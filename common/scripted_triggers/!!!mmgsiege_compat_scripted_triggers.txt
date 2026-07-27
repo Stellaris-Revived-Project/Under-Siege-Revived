@@ -1,0 +1,11 @@
+has_upgraded_capital_4 = {
+	always = no
+}
+
+has_upgraded_capital_5 = {
+	always = no
+}
+
+has_upgraded_capital_6 = {
+	always = no
+}

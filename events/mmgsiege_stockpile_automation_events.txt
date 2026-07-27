@@ -1,0 +1,305 @@
+namespace = mmgsiege_stockpile_automation
+
+# manage stockpile automation budget
+country_event = {
+	id = mmgsiege_stockpile_automation.101
+	is_triggered_only = yes
+	title = mmgsiege_manage_stockpile_budget
+	desc = mmgsiege_manage_stockpile_budget_desc
+	custom_gui = mmgsiege_stockpile_budget_menu
+	diplomatic = yes
+	picture_event_data = {
+		portrait = root.owner_main_species
+		room = enclave_curator_room
+	}
+	auto_opens = yes
+	immediate = {
+		set_country_flag = mmgsiege_stockpile_automation_open
+		if = {
+			limit = { NOT = { is_variable_set = mmgsiege_energy_stockpile_budget } }
+			set_variable = {
+				which = mmgsiege_energy_stockpile_budget
+				value = 0
+			}
+		}
+		if = {
+			limit = { NOT = { is_variable_set = mmgsiege_minerals_stockpile_budget } }
+			set_variable = {
+				which = mmgsiege_minerals_stockpile_budget
+				value = 0
+			}
+		}
+		if = {
+			limit = { NOT = { is_variable_set = mmgsiege_food_stockpile_budget } }
+			set_variable = {
+				which = mmgsiege_food_stockpile_budget
+				value = 0
+			}
+		}
+		if = {
+			limit = { NOT = { is_variable_set = mmgsiege_consumer_goods_stockpile_budget } }
+			set_variable = {
+				which = mmgsiege_consumer_goods_stockpile_budget
+				value = 0
+			}
+		}
+		if = {
+			limit = { NOT = { is_variable_set = mmgsiege_energy_stockpile_budget_percent } }
+			set_variable = {
+				which = mmgsiege_energy_stockpile_budget_percent
+				value = 0
+			}
+		}
+		if = {
+			limit = { NOT = { is_variable_set = mmgsiege_minerals_stockpile_budget_percent } }
+			set_variable = {
+				which = mmgsiege_minerals_stockpile_budget_percent
+				value = 0
+			}
+		}
+		if = {
+			limit = { NOT = { is_variable_set = mmgsiege_food_stockpile_budget_percent } }
+			set_variable = {
+				which = mmgsiege_food_stockpile_budget_percent
+				value = 0
+			}
+		}
+		if = {
+			limit = { NOT = { is_variable_set = mmgsiege_consumer_goods_stockpile_budget_percent } }
+			set_variable = {
+				which = mmgsiege_consumer_goods_stockpile_budget_percent
+				value = 0
+			}
+		}
+	}
+	option = { name = CLOSE }
+	after = {
+		remove_country_flag = mmgsiege_stockpile_automation_open
+	}
+}
+
+# wrapper to set up scopes
+country_event = {
+	id = mmgsiege_stockpile_automation.102
+	is_triggered_only = yes
+	hide_window = yes
+	immediate = {
+		country_event = {
+			id = mmgsiege_stockpile_automation.101
+			scopes = {
+				from = this
+			}
+		}
+	}
+}
+
+# wrapper for to fire below event roughly every 6 months
+# fire in middle of april and october to minimize lag (randomized per country)
+event = {
+	id = mmgsiege_stockpile_automation.201
+	is_triggered_only = yes
+	hide_window = yes
+	immediate = {
+		every_country = {
+			country_event = {
+				id = mmgsiege_stockpile_automation.202
+				days = 95
+				random = 20
+			}
+			country_event = {
+				id = mmgsiege_stockpile_automation.202
+				days = 275
+				random = 20
+			}
+		}
+	}
+}
+
+# cache planet stockpile resource balance/upkeep for calcuating priorities, run every six months
+country_event = {
+	id = mmgsiege_stockpile_automation.202
+	is_triggered_only = yes
+	hide_window = yes
+	immediate = {
+		every_owned_planet = {
+			mmgsiege_export_planet_balance_and_upkeep = { RESOURCE = energy }
+			mmgsiege_export_planet_balance_and_upkeep = { RESOURCE = minerals }
+			mmgsiege_export_planet_balance_and_upkeep = { RESOURCE = food }
+			mmgsiege_export_planet_balance_and_upkeep = { RESOURCE = consumer_goods }
+		}
+	}
+}
+
+# allocate budget
+country_event = {
+	id = mmgsiege_stockpile_automation.401
+	hide_window = yes
+	is_triggered_only = yes
+	immediate = {
+		# TODO what's the behavior if the edict runs out of resources and turns off?
+		# allocate
+		if = {
+			limit = {
+				OR = {
+					is_ai = yes # AI don't use the edict
+					has_edict = mmgsiege_stockpile_automation
+					has_edict = mmgsiege_stockpile_automation_alt
+				}
+			}
+			mmgsiege_allocate_stockpile_budget = { RESOURCE = energy }
+			mmgsiege_allocate_stockpile_budget = { RESOURCE = minerals }
+			mmgsiege_allocate_stockpile_budget = { RESOURCE = food }
+			mmgsiege_allocate_stockpile_budget = { RESOURCE = consumer_goods }
+		}
+		# zero out if edict is off
+		if = {
+			limit = {
+				NOR = {
+					has_edict = mmgsiege_stockpile_automation
+					has_edict = mmgsiege_stockpile_automation_alt
+				}
+			}
+			set_variable = { which = mmgsiege_energy_stockpile_budget_last_month value = 0 }
+			set_variable = { which = mmgsiege_minerals_stockpile_budget_last_month value = 0 }
+			set_variable = { which = mmgsiege_food_stockpile_budget_last_month value = 0 }
+			set_variable = { which = mmgsiege_consumer_goods_stockpile_budget_last_month value = 0 }
+		}
+		# update stockpile
+		mmgsiege_set_stockpile_budget_from_percent = { RESOURCE = energy }
+		mmgsiege_set_stockpile_budget_from_percent = { RESOURCE = minerals }
+		mmgsiege_set_stockpile_budget_from_percent = { RESOURCE = food }
+		mmgsiege_set_stockpile_budget_from_percent = { RESOURCE = consumer_goods }
+	}
+}
+
+# wrapper to allocate budget on 2nd of each month
+country_event = {
+	id = mmgsiege_stockpile_automation.402
+	hide_window = yes
+	is_triggered_only = yes
+	immediate = {
+		country_event = {
+			id = mmgsiege_stockpile_automation.401
+			days = 1
+		}
+	}
+}
+
+# set default percents
+country_event = {
+	id = mmgsiege_stockpile_automation.501
+	hide_window = yes
+	is_triggered_only = yes
+	immediate = {
+		if = {
+			limit = {
+				NAND = {
+					is_variable_set = mmgsiege_energy_stockpile_budget_percent
+					is_variable_set = mmgsiege_minerals_stockpile_budget_percent
+					is_variable_set = mmgsiege_food_stockpile_budget_percent
+					is_variable_set = mmgsiege_consumer_goods_stockpile_budget_percent
+				}
+			}
+			# energy budget - higher if main species is energy-consuming
+			if = {
+				limit = {
+					exists = owner_species
+					owner_species = {
+						OR = {
+							has_trait = trait_plantoid_phototrophic
+							has_trait = trait_plantoid_radiotrophic
+							has_trait = trait_mechanical
+							has_trait = trait_machine_unit
+						}
+					}
+				}
+				mmgsiege_set_stockpile_budget_percent = {
+					RESOURCE = energy
+					PERCENT = 20
+				}
+			}
+			else = {
+				mmgsiege_set_stockpile_budget_percent = {
+					RESOURCE = energy
+					PERCENT = 10
+				}
+			}
+
+			# minerals budget - higher if main species is lithoid
+			if = {
+				limit = {
+					exists = owner_species
+					owner_species = {
+						has_trait = trait_lithoid
+					}
+				}
+				mmgsiege_set_stockpile_budget_percent = {
+					RESOURCE = minerals
+					PERCENT = 20
+				}
+			}
+			else = {
+				mmgsiege_set_stockpile_budget_percent = {
+					RESOURCE = minerals
+					PERCENT = 10
+				}
+			}
+
+			# food budget - higher if main species is food-consuming
+			# higher base percent since stockpiled food isn't very useful
+			if = {
+				limit = {
+					exists = owner_species
+					owner_species = {
+						NOR = {
+							has_trait = trait_mechanical
+							has_trait = trait_machine_unit
+							has_trait = trait_lithoid
+						}
+					}
+				}
+				mmgsiege_set_stockpile_budget_percent = {
+					RESOURCE = food
+					PERCENT = 20
+				}
+			}
+			else = {
+				mmgsiege_set_stockpile_budget_percent = {
+					RESOURCE = food
+					PERCENT = 10
+				}
+			}
+
+			# consumer goods budget - no special logic
+			# higher base percent since stockpiled consumer aren't very useful
+			mmgsiege_set_stockpile_budget_percent = {
+				RESOURCE = consumer_goods
+				PERCENT = 20
+			}
+		}
+	}
+}
+
+event = {
+	id = mmgsiege_stockpile_automation.502
+	is_triggered_only = yes
+	hide_window = yes
+	immediate = {
+		every_country = {
+			country_event = { id = mmgsiege_stockpile_automation.501 }
+		}
+	}
+}
+
+# on_single_player_save_game_load
+# clean up mmgsiege_stockpile_automation_open
+event = {
+	id = mmgsiege_stockpile_automation.511
+	hide_window = yes
+	is_triggered_only = yes
+	immediate = {
+		every_country = {
+			remove_country_flag = mmgsiege_stockpile_automation_open
+		}
+	}
+}

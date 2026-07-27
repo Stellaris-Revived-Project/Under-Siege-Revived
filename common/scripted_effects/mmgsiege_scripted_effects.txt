@@ -1,0 +1,1066 @@
+mmgsiege_export_planet_balance_and_upkeep = {
+	export_trigger_value_to_variable = {
+		trigger = planet_resource_compare
+		parameters = {
+			resource = $RESOURCE$
+			type = balance
+		}
+		variable = mmgsiege_$RESOURCE$_balance
+	}
+	export_trigger_value_to_variable = {
+		trigger = planet_resource_compare
+		parameters = {
+			resource = $RESOURCE$
+			type = upkeep
+		}
+		variable = mmgsiege_$RESOURCE$_upkeep
+	}
+	if = {
+		limit = { is_capital = yes }
+		# add country base production to capital
+		change_variable = {
+			which = mmgsiege_$RESOURCE$_balance
+			value = owner.value:mmgsiege_country_base_production_$RESOURCE$
+		}
+	}
+}
+
+mmgsiege_check_for_and_update_resource_shortage = {
+	# store these in variables for easier usage and so we don't recalc them
+	# (docs warn that this trigger is expensive)
+	# do NOT clear them, since they are also used for stockpile automation
+	mmgsiege_export_planet_balance_and_upkeep = { RESOURCE = $RESOURCE$ }
+
+	# save copy of balance, unmodified by stockpile, so we can reset it
+	set_variable = {
+		which = mmgsiege_$RESOURCE$_balance_copy
+		value = mmgsiege_$RESOURCE$_balance
+	}
+
+	# if there's a deficit, check for stockpile, modifying balance as appropriate
+	if = {
+		limit = {
+			is_variable_set = mmgsiege_$RESOURCE$_stockpile
+			check_variable = {
+				which = mmgsiege_$RESOURCE$_stockpile
+				value > 0
+			}
+			check_variable = {
+				which = mmgsiege_$RESOURCE$_balance
+				value < 0
+			}
+		}
+		# check if has deficit and stockpile >= deficit
+		if = {
+			limit = {
+				check_variable_arithmetic = {
+					which = mmgsiege_$RESOURCE$_stockpile
+					add = mmgsiege_$RESOURCE$_balance # balance is negative, so add not subtract
+					value >= 0
+				}
+			}
+			# subtract deficit from stockpile and zero out balance
+			change_variable = {
+				which = mmgsiege_$RESOURCE$_stockpile
+				value = mmgsiege_$RESOURCE$_balance
+			}
+			floor_variable = mmgsiege_$RESOURCE$_stockpile
+			set_variable = {
+				which = mmgsiege_$RESOURCE$_balance
+				value = 0
+			}
+		}
+		else = {
+			# subtract stockpile from deficit and zero out stockpile
+			change_variable = {
+				which = mmgsiege_$RESOURCE$_balance
+				value = mmgsiege_$RESOURCE$_stockpile
+			}
+			set_variable = {
+				which = mmgsiege_$RESOURCE$_stockpile
+				value = 0
+			}
+		}
+	}
+
+	# check is balance is negative
+	if = {
+		limit = {
+			check_variable = {
+				which = mmgsiege_$RESOURCE$_balance
+				value < 0
+			}
+		}
+		# clear recovery progress
+		if = {
+			limit = { is_variable_set = mmgsiege_$RESOURCE$_shortage_recovery_progress }
+			clear_variable = mmgsiege_$RESOURCE$_shortage_recovery_progress
+		}
+		# initialize variable if needed
+		if = {
+			limit = { NOT = { is_variable_set = mmgsiege_$RESOURCE$_shortage_progress } }
+			set_variable = {
+				which = mmgsiege_$RESOURCE$_shortage_progress
+				value = 0
+			}
+		}
+		# add progress
+		set_variable = {
+			which = mmgsiege_$RESOURCE$_shortage_progress_add
+			value = mmgsiege_$RESOURCE$_balance
+		}
+		multiply_variable = {
+			which = mmgsiege_$RESOURCE$_shortage_progress_add
+			value = -100
+		}
+		divide_variable = {
+			which = mmgsiege_$RESOURCE$_shortage_progress_add
+			value = mmgsiege_$RESOURCE$_upkeep
+		}
+		divide_variable = {
+			which = mmgsiege_$RESOURCE$_shortage_progress_add
+			value = 2
+		}
+		ceiling_variable = mmgsiege_$RESOURCE$_shortage_progress_add
+		change_variable = {
+			which = mmgsiege_$RESOURCE$_shortage_progress
+			value = mmgsiege_$RESOURCE$_shortage_progress_add
+		}
+		clear_variable = mmgsiege_$RESOURCE$_shortage_progress_add
+		# check progress
+		if = {
+			limit = {
+				OR = {
+					check_variable = {
+						which = mmgsiege_$RESOURCE$_shortage_progress
+						value >= 100
+					}
+					NOT = { mmgsiege_has_resource_shortage = { RESOURCE = $RESOURCE$ } }
+				}
+			}
+			mmgsiege_increase_resource_shortage = { RESOURCE = $RESOURCE$ }
+		}
+	}
+	else = { # positive balance, increase resource shortage recovery progress
+		if = {
+			limit = { NOT = { is_variable_set = mmgsiege_$RESOURCE$_shortage_recovery_progress } }
+			set_variable = {
+				which = mmgsiege_$RESOURCE$_shortage_recovery_progress
+				value = 0
+			}
+		}
+		if = {
+			limit = {
+				is_variable_set = mmgsiege_$RESOURCE$_shortage_progress
+				check_variable = {
+					which = mmgsiege_$RESOURCE$_shortage_progress
+					value > 0
+				}
+			}
+			set_variable = {
+				which = mmgsiege_$RESOURCE$_shortage_progress
+				value = 0
+			}
+		} else = {
+			change_variable = {
+				which = mmgsiege_$RESOURCE$_shortage_recovery_progress
+				value = 1
+			}
+		}
+		if = {
+			limit = {
+				check_variable = {
+					which = mmgsiege_$RESOURCE$_shortage_recovery_progress
+					value >= 3
+				}
+			}
+			mmgsiege_decrease_resource_shortage = { RESOURCE = $RESOURCE$ }
+		}
+	}
+
+	# restore copy of balance, unmodified by stockpile
+	set_variable = {
+		which = mmgsiege_$RESOURCE$_balance
+		value = mmgsiege_$RESOURCE$_balance_copy
+	}
+	clear_variable = mmgsiege_$RESOURCE$_balance_copy
+}
+
+# decrease shortages on planets without siege, never increase
+mmgsiege_check_for_and_update_resource_shortage_no_siege = {
+	if = {
+		limit = { NOT = { is_variable_set = mmgsiege_$RESOURCE$_shortage_recovery_progress } }
+		set_variable = {
+			which = mmgsiege_$RESOURCE$_shortage_recovery_progress
+			value = 0
+		}
+	}
+	if = {
+		limit = {
+			is_variable_set = mmgsiege_$RESOURCE$_shortage_progress
+			check_variable = {
+				which = mmgsiege_$RESOURCE$_shortage_progress
+				value > 0
+			}
+		}
+		set_variable = {
+			which = mmgsiege_$RESOURCE$_shortage_progress
+			value = 0
+		}
+	} else = {
+		change_variable = {
+			which = mmgsiege_$RESOURCE$_shortage_recovery_progress
+			value = 1
+		}
+	}
+	if = {
+		limit = {
+			check_variable = {
+				which = mmgsiege_$RESOURCE$_shortage_recovery_progress
+				value >= 3
+			}
+		}
+		mmgsiege_decrease_resource_shortage = { RESOURCE = $RESOURCE$ }
+	}
+}
+
+mmgsiege_increase_resource_shortage = {
+	if = {
+		limit = { NOT = { mmgsiege_has_resource_shortage = { RESOURCE = $RESOURCE$ } } }
+		set_planet_flag = mmgsiege_$RESOURCE$_shortage
+		set_variable = {
+			which = mmgsiege_$RESOURCE$_shortage_level
+			value = 0
+		}
+	}
+	if = {
+		limit = {
+			check_variable = {
+				which = mmgsiege_$RESOURCE$_shortage_level
+				value < 4
+			}
+		}
+		change_variable = {
+			which = mmgsiege_$RESOURCE$_shortage_level
+			value = 1
+		}
+	}
+	set_variable = {
+		which = mmgsiege_$RESOURCE$_shortage_progress
+		value = 0
+	}
+}
+
+mmgsiege_decrease_resource_shortage = {
+	if = {
+		limit = { is_variable_set = mmgsiege_$RESOURCE$_shortage_recovery_progress }
+		clear_variable = mmgsiege_$RESOURCE$_shortage_recovery_progress
+	}
+	if = {
+		limit = { is_variable_set = mmgsiege_$RESOURCE$_shortage_progress }
+		clear_variable = mmgsiege_$RESOURCE$_shortage_progress
+	}
+	if = {
+		limit = { is_variable_set = mmgsiege_$RESOURCE$_shortage_level }
+		subtract_variable = {
+			which = mmgsiege_$RESOURCE$_shortage_level
+			value = 1
+		}
+	}
+	if = {
+		limit = {
+			is_variable_set = mmgsiege_$RESOURCE$_shortage_level
+			check_variable = { which = mmgsiege_$RESOURCE$_shortage_level value <= 0 }
+		}
+		clear_variable = mmgsiege_$RESOURCE$_shortage_level
+	}
+	if = {
+		limit = {
+			NOT = { is_variable_set = mmgsiege_$RESOURCE$_shortage_level }
+			has_planet_flag = mmgsiege_$RESOURCE$_shortage
+		}
+		remove_planet_flag = mmgsiege_$RESOURCE$_shortage
+	}
+}
+
+mmgsiege_calculate_stockpile_maximum = {
+	set_variable = {
+		which = mmgsiege_stockpile_maximum
+		value = value:mmgsiege_stockpile_maximum
+	}
+
+	# reduce stockpiles if above max
+	if = {
+		limit = {
+			is_variable_set = mmgsiege_energy_stockpile
+			check_variable = {
+				which = mmgsiege_energy_stockpile
+				value > mmgsiege_stockpile_maximum
+			}
+		}
+		# refund difference to country stockpile if not under siege
+		if = {
+			limit = { mmgsiege_is_under_siege = no }
+			subtract_variable = {
+				which = mmgsiege_energy_stockpile
+				value = mmgsiege_stockpile_maximum
+			}
+			owner = {
+				add_resource = {
+					energy = 1
+					mult = prev.mmgsiege_energy_stockpile_add
+				}
+			}
+		}
+		# set to stockpile max
+		set_variable = {
+			which = mmgsiege_energy_stockpile
+			value = mmgsiege_stockpile_maximum
+		}
+	}
+	if = {
+		limit = {
+			is_variable_set = mmgsiege_minerals_stockpile
+			check_variable = {
+				which = mmgsiege_minerals_stockpile
+				value > mmgsiege_stockpile_maximum
+			}
+		}
+		# refund difference to country stockpile if not under siege
+		if = {
+			limit = { mmgsiege_is_under_siege = no }
+			subtract_variable = {
+				which = mmgsiege_minerals_stockpile
+				value = mmgsiege_stockpile_maximum
+			}
+			owner = {
+				add_resource = {
+					minerals = 1
+					mult = prev.mmgsiege_minerals_stockpile_add
+				}
+			}
+		}
+		# set to stockpile max
+		set_variable = {
+			which = mmgsiege_minerals_stockpile
+			value = mmgsiege_stockpile_maximum
+		}
+	}
+	if = {
+		limit = {
+			is_variable_set = mmgsiege_food_stockpile
+			check_variable = {
+				which = mmgsiege_food_stockpile
+				value > mmgsiege_stockpile_maximum
+			}
+		}
+		# refund difference to country stockpile if not under siege
+		if = {
+			limit = { mmgsiege_is_under_siege = no }
+			subtract_variable = {
+				which = mmgsiege_food_stockpile
+				value = mmgsiege_stockpile_maximum
+			}
+			owner = {
+				add_resource = {
+					food = 1
+					mult = prev.mmgsiege_food_stockpile_add
+				}
+			}
+		}
+		# set to stockpile max
+		set_variable = {
+			which = mmgsiege_food_stockpile
+			value = mmgsiege_stockpile_maximum
+		}
+	}
+	if = {
+		limit = {
+			is_variable_set = mmgsiege_consumer_goods_stockpile
+			check_variable = {
+				which = mmgsiege_consumer_goods_stockpile
+				value > mmgsiege_stockpile_maximum
+			}
+		}
+		# refund difference to country stockpile if not under siege
+		if = {
+			limit = { mmgsiege_is_under_siege = no }
+			subtract_variable = {
+				which = mmgsiege_consumer_goods_stockpile
+				value = mmgsiege_stockpile_maximum
+			}
+			owner = {
+				add_resource = {
+					consumer_goods = 1
+					mult = prev.mmgsiege_consumer_goods_stockpile_add
+				}
+			}
+		}
+		# set to stockpile max
+		set_variable = {
+			which = mmgsiege_consumer_goods_stockpile
+			value = mmgsiege_stockpile_maximum
+		}
+	}
+	clear_variable = mmgsiege_stockpile_maximum
+}
+
+mmgsiege_calculate_stockpile_priority = {
+	# define balance/upkeep vars, only if needed
+	# they are updated via event every 6 months
+	# (will be outdated, but should be sufficient for determining priority)
+	if = {
+		limit = {
+			NAND = {
+				is_variable_set = mmgsiege_$RESOURCE$_balance
+				is_variable_set = mmgsiege_$RESOURCE$_upkeep
+			}
+		}
+		mmgsiege_export_planet_balance_and_upkeep = { RESOURCE = $RESOURCE$ }
+	}
+
+	# calc deficit scale, 0-100 if there's deficit
+	set_variable = {
+		which = mmgsiege_$RESOURCE$_deficit_scale
+		value = mmgsiege_$RESOURCE$_balance
+	}
+	multiply_variable = {
+		which = mmgsiege_$RESOURCE$_deficit_scale
+		value = -100
+	}
+	if = {
+		limit = {
+			check_variable = {
+				which = mmgsiege_$RESOURCE$_upkeep
+				value > 1
+			}
+		}
+		divide_variable = {
+			which = mmgsiege_$RESOURCE$_deficit_scale
+			value = mmgsiege_$RESOURCE$_upkeep
+		}
+	}
+
+	# calc stockpile months
+	if = {
+		limit = { is_variable_set = mmgsiege_$RESOURCE$_stockpile }
+		set_variable = {
+			which = mmgsiege_$RESOURCE$_stockpile_months
+			value = mmgsiege_$RESOURCE$_stockpile
+		}
+		if = {
+			limit = {
+				check_variable = {
+					which = mmgsiege_$RESOURCE$_balance
+					value < -1
+				}
+			}
+			divide_variable = {
+				which = mmgsiege_$RESOURCE$_stockpile_months
+				value = mmgsiege_$RESOURCE$_balance
+			}
+			multiply_variable = {
+				which = mmgsiege_$RESOURCE$_stockpile_months
+				value = -1
+			}
+		}
+	}
+	else = {
+		set_variable = {
+			which = mmgsiege_$RESOURCE$_stockpile_months
+			value = 0
+		}
+	}
+
+	# calc priority (num pops + deficit scale - stockpile months)
+	export_trigger_value_to_variable = {
+		trigger = count_owned_pop_amount
+		variable = mmgsiege_$RESOURCE$_stockpile_priority
+	}
+	divide_variable = {
+		which = mmgsiege_$RESOURCE$_stockpile_priority
+		value = 100
+	}
+	round_variable = mmgsiege_$RESOURCE$_stockpile_priority
+	change_variable = {
+		which = mmgsiege_$RESOURCE$_stockpile_priority
+		value = mmgsiege_$RESOURCE$_deficit_scale
+	}
+	subtract_variable = {
+		which = mmgsiege_$RESOURCE$_stockpile_priority
+		value = mmgsiege_$RESOURCE$_stockpile_months
+	}
+
+	# multiply if positive and bordering hostile-controlled system
+	if = {
+		limit = {
+			check_variable = {
+				which = mmgsiege_$RESOURCE$_stockpile_priority
+				value > 0
+			}
+			solar_system = {
+				any_neighbor_system = {
+					exists = owner
+					owner = {
+						is_at_war_with = prevprevprev.owner
+					}
+				}
+			}
+		}
+		multiply_variable = {
+			which = mmgsiege_$RESOURCE$_stockpile_priority
+			value = 2
+		}
+	}
+
+	# cleanup
+	clear_variable = mmgsiege_$RESOURCE$_deficit_scale
+	clear_variable = mmgsiege_$RESOURCE$_stockpile_months
+}
+
+mmgsiege_increase_local_stockpile = {
+	# initialize temp variable
+	set_variable = {
+		which = mmgsiege_$RESOURCE$_stockpile_add
+		value = $AMOUNT$
+	}
+	# wrapping everything in an if gets rid of some logged error when hovering over buttons
+	if = {
+		limit = { is_variable_set = mmgsiege_$RESOURCE$_stockpile_add }
+		# define if needed
+		if = {
+			limit = { NOT = { is_variable_set = mmgsiege_$RESOURCE$_stockpile } }
+			set_variable = {
+				which = mmgsiege_$RESOURCE$_stockpile
+				value = 0
+			}
+		}
+		# don't spend more than can fit and be afforded
+		set_variable = {
+			which = mmgsiege_$RESOURCE$_stockpile_add
+			value = value:mmgsiege_max_transferable_to_local_stockpile|RESOURCE|$RESOURCE$|MAX|$AMOUNT$|
+		}
+		# add to local stockpile
+		change_variable = {
+			which = mmgsiege_$RESOURCE$_stockpile
+			value = mmgsiege_$RESOURCE$_stockpile_add
+		}
+		# remove from empire stockpile
+		owner = {
+			add_resource = {
+				$RESOURCE$ = -1
+				mult = prev.mmgsiege_$RESOURCE$_stockpile_add
+			}
+		}
+		# and clear temp variable
+		clear_variable = mmgsiege_$RESOURCE$_stockpile_add
+	}
+}
+
+mmgsiege_decrease_local_stockpile = {
+	# initialize temp variable
+	set_variable = {
+		which = mmgsiege_$RESOURCE$_stockpile_subtract
+		value = $AMOUNT$
+	}
+	# wrapping everything in an if gets rid of some logged error when hovering over buttons
+	if = {
+		limit = { is_variable_set = mmgsiege_$RESOURCE$_stockpile_subtract }
+		# define if needed
+		if = {
+			limit = { NOT = { is_variable_set = mmgsiege_$RESOURCE$_stockpile } }
+			set_variable = {
+				which = mmgsiege_$RESOURCE$_stockpile
+				value = 0
+			}
+		}
+		# don't remove more than there is
+		if = {
+			limit = {
+				check_variable = {
+					which = mmgsiege_$RESOURCE$_stockpile_subtract
+					value > mmgsiege_$RESOURCE$_stockpile
+				}
+			}
+			set_variable = {
+				which = mmgsiege_$RESOURCE$_stockpile_subtract
+				value = mmgsiege_$RESOURCE$_stockpile
+			}
+		}
+		# remove from stockpile
+		subtract_variable = {
+			which = mmgsiege_$RESOURCE$_stockpile
+			value = mmgsiege_$RESOURCE$_stockpile_subtract
+		}
+		# add to empire stockpile
+		owner = {
+			add_resource = {
+				$RESOURCE$ = 1
+				mult = prev.mmgsiege_$RESOURCE$_stockpile_subtract
+			}
+		}
+		# and clear temp variable
+		clear_variable = mmgsiege_$RESOURCE$_stockpile_subtract
+	}
+}
+
+mmgsiege_empty_stockpile = {
+	if = {
+		limit = { is_variable_set = mmgsiege_$RESOURCE$_stockpile }
+		owner = {
+			add_resource = {
+				$RESOURCE$ = 1
+				mult = prev.mmgsiege_$RESOURCE$_stockpile
+			}
+		}
+		set_variable = {
+			which = mmgsiege_$RESOURCE$_stockpile
+			value = 0
+		}
+	}
+}
+
+mmgsiege_max_stockpile = {
+	set_variable = {
+		which = mmgsiege_$RESOURCE$_amount_to_stockpile
+		value = value:mmgsiege_stockpile_maximum
+	}
+	# wrapping in if "fixes" some errors that get logged when hovering button
+	if = {
+		limit = { is_variable_set = mmgsiege_$RESOURCE$_amount_to_stockpile }
+		if = {
+			limit = { is_variable_set = mmgsiege_$RESOURCE$_stockpile }
+			# decrease by amount already in stockpile
+			subtract_variable = {
+				which = mmgsiege_$RESOURCE$_amount_to_stockpile
+				value = mmgsiege_$RESOURCE$_stockpile
+			}
+			mmgsiege_increase_local_stockpile = {
+				RESOURCE = $RESOURCE$
+				AMOUNT = mmgsiege_$RESOURCE$_amount_to_stockpile
+			}
+			clear_variable = mmgsiege_$RESOURCE$_amount_to_stockpile
+		}
+	}
+}
+
+mmgsiege_increase_stockpile_budget = {
+	if = {
+		limit = { NOT = { is_variable_set = mmgsiege_$RESOURCE$_stockpile_budget_percent } }
+		set_variable = {
+			which = mmgsiege_$RESOURCE$_stockpile_budget_percent
+			value = 0
+		}
+	}
+	change_variable = {
+		which = mmgsiege_$RESOURCE$_stockpile_budget_percent
+		value = $AMOUNT$
+	}
+	if = {
+		limit = {
+			check_variable = {
+				which = mmgsiege_$RESOURCE$_stockpile_budget_percent
+				value < 0
+			}
+		}
+		set_variable = {
+			which = mmgsiege_$RESOURCE$_stockpile_budget_percent
+			value = 0
+		}
+	}
+	if = {
+		limit = {
+			check_variable = {
+				which = mmgsiege_$RESOURCE$_stockpile_budget_percent
+				value > 100
+			}
+		}
+		set_variable = {
+			which = mmgsiege_$RESOURCE$_stockpile_budget_percent
+			value = 100
+		}
+	}
+
+	mmgsiege_set_stockpile_budget_from_percent = { RESOURCE = $RESOURCE$ }
+	mmgsiege_toggle_stockpile_automation_alt = yes
+}
+
+mmgsiege_set_stockpile_budget_from_percent = {
+	export_trigger_value_to_variable = {
+		trigger = resource_income_compare
+		parameters = { resource = $RESOURCE$ }
+		variable = mmgsiege_$RESOURCE$_stockpile_budget
+	}
+	if = {
+		limit = { is_variable_set = mmgsiege_$RESOURCE$_stockpile_budget_last_month }
+		change_variable = {
+			which = mmgsiege_$RESOURCE$_stockpile_budget
+			value = mmgsiege_$RESOURCE$_stockpile_budget_last_month
+		}
+	}
+	multiply_variable = {
+		which = mmgsiege_$RESOURCE$_stockpile_budget
+		value = mmgsiege_$RESOURCE$_stockpile_budget_percent
+	}
+	divide_variable = {
+		which = mmgsiege_$RESOURCE$_stockpile_budget
+		value = 100
+	}
+	round_variable = mmgsiege_$RESOURCE$_stockpile_budget
+	if = {
+		limit = {
+			check_variable = {
+				which = mmgsiege_$RESOURCE$_stockpile_budget
+				value < 0
+			}
+		}
+		set_variable = {
+			which = mmgsiege_$RESOURCE$_stockpile_budget
+			value = 0
+		}
+	}
+}
+
+mmgsiege_toggle_stockpile_automation_alt = {
+	if = {
+		limit = { has_country_flag = mmgsiege_stockpile_automation_alt }
+		remove_country_flag = mmgsiege_stockpile_automation_alt
+	} else = {
+		set_country_flag = mmgsiege_stockpile_automation_alt
+	}
+}
+
+mmgsiege_allocate_stockpile_budget = {
+	if = {
+		limit = { NOT = { is_variable_set = mmgsiege_$RESOURCE$_stockpile_budget } }
+		set_variable = {
+			which = mmgsiege_$RESOURCE$_stockpile_budget
+			value = 0
+		}
+	}
+	set_variable = {
+		which = mmgsiege_$RESOURCE$_stockpile_budget_last_month
+		value = mmgsiege_$RESOURCE$_stockpile_budget
+	}
+	if = {
+		limit = {
+			check_variable = {
+				which = mmgsiege_$RESOURCE$_stockpile_budget
+				value > 0
+			}
+		}
+
+		# init unallocated var
+		set_variable = {
+			which = mmgsiege_$RESOURCE$_stockpile_budget_unallocated
+			value = mmgsiege_$RESOURCE$_stockpile_budget
+		}
+		# set stockpile granularity (max amount each iteration can stockpile)
+		set_variable = {
+			which = mmgsiege_$RESOURCE$_stockpile_granularity
+			value = mmgsiege_$RESOURCE$_stockpile_budget
+		}
+		divide_variable = {
+			which = mmgsiege_$RESOURCE$_stockpile_granularity
+			value = 10
+		}
+		ceiling_variable = mmgsiege_$RESOURCE$_stockpile_granularity
+
+		# init can_stockpile flag and priority var
+		every_owned_planet = {
+			mmgsiege_calculate_stockpile_priority = {
+				RESOURCE = $RESOURCE$
+			}
+			if = {
+				limit = {
+					mmgsiege_can_stockpile = yes
+				}
+				set_planet_flag = mmgsiege_can_stockpile_$RESOURCE$
+			}
+		}
+
+		# main loop, allocate until there no more unallocated budget or no valid planets
+		while = {
+			limit = {
+				check_variable = {
+					which = mmgsiege_$RESOURCE$_stockpile_budget_unallocated
+					value > 0
+				}
+				any_owned_planet = {
+					has_planet_flag = mmgsiege_can_stockpile_$RESOURCE$
+				}
+			}
+			ordered_owned_planet = {
+				limit = {
+					has_planet_flag = mmgsiege_can_stockpile_$RESOURCE$
+				}
+				order_by = mmgsiege_$RESOURCE$_stockpile_priority
+				position = 0
+				set_variable = {
+					which = mmgsiege_$RESOURCE$_to_stockpile
+					value = prev.mmgsiege_$RESOURCE$_stockpile_budget_unallocated
+				}
+				# set stockpile to 0 if needed
+				if = {
+					limit = { NOT = { is_variable_set = mmgsiege_$RESOURCE$_stockpile } }
+					set_variable = {
+						which = mmgsiege_$RESOURCE$_stockpile
+						value = 0
+					}
+				}
+				# enforce stockpile_granularity
+				if = {
+					limit = {
+						check_variable = {
+							which = mmgsiege_$RESOURCE$_to_stockpile
+							value > prev.mmgsiege_$RESOURCE$_stockpile_granularity
+						}
+					}
+					set_variable = {
+						which = mmgsiege_$RESOURCE$_to_stockpile
+						value = prev.mmgsiege_$RESOURCE$_stockpile_granularity
+					}
+				}
+				# don't stockpile above planet stockpile max
+				if = {
+					limit = {
+						check_variable_arithmetic = {
+							which = mmgsiege_$RESOURCE$_stockpile
+							add = mmgsiege_$RESOURCE$_to_stockpile
+							value >= value:mmgsiege_stockpile_maximum
+						}
+					}
+					set_variable = {
+						which = mmgsiege_$RESOURCE$_to_stockpile
+						value = value:mmgsiege_stockpile_maximum
+					}
+					subtract_variable = {
+						which = mmgsiege_$RESOURCE$_to_stockpile
+						value = mmgsiege_$RESOURCE$_stockpile
+					}
+					# remove mmgsiege_can_stockpile_$RESOURCE$ flag, since it will now be full
+					remove_planet_flag = mmgsiege_can_stockpile_$RESOURCE$
+				}
+				# update stockpile, update unallocated, flag planet
+				change_variable = {
+					which = mmgsiege_$RESOURCE$_stockpile
+					value = mmgsiege_$RESOURCE$_to_stockpile
+				}
+				prev = {
+					subtract_variable = {
+						which = mmgsiege_$RESOURCE$_stockpile_budget_unallocated
+						value = prev.mmgsiege_$RESOURCE$_to_stockpile
+					}
+				}
+				# cleanup
+				clear_variable = mmgsiege_$RESOURCE$_to_stockpile
+				# recalc priority
+				mmgsiege_calculate_stockpile_priority = { RESOURCE = $RESOURCE$ }
+			}
+		} # end main loop
+
+		# refund if there's any unallocated budget left
+		# player only (AI hasn't payed yet)
+		if = {
+			limit = {
+				is_ai = no
+				check_variable = {
+					which = mmgsiege_$RESOURCE$_stockpile_budget_unallocated
+					value > 0
+				}
+			}
+			add_resource = {
+				$RESOURCE$ = 1
+				multiplier = mmgsiege_$RESOURCE$_stockpile_budget_unallocated
+			}
+		}
+		# charge the AI (player is charged by the edict)
+		if = {
+			limit = {
+				is_ai = yes
+				check_variable = {
+					which = mmgsiege_$RESOURCE$_stockpile_budget_unallocated
+					value < mmgsiege_$RESOURCE$_stockpile_budget
+				}
+			}
+			set_variable = {
+				which = mmgsiege_$RESOURCE$_stockpile_budget_used
+				value = mmgsiege_$RESOURCE$_stockpile_budget
+			}
+			subtract_variable = {
+				which = mmgsiege_$RESOURCE$_stockpile_budget_used
+				value = mmgsiege_$RESOURCE$_stockpile_budget_unallocated
+			}
+			add_resource = {
+				$RESOURCE$ = -1
+				multiplier = mmgsiege_$RESOURCE$_stockpile_budget_used
+			}
+			clear_variable = mmgsiege_$RESOURCE$_stockpile_budget_used
+		}
+
+		# clean up
+		clear_variable = mmgsiege_$RESOURCE$_stockpile_granularity
+		clear_variable = mmgsiege_$RESOURCE$_stockpile_budget_unallocated
+		every_owned_planet = {
+			limit = {
+				has_planet_flag = mmgsiege_can_stockpile_$RESOURCE$
+			}
+			remove_planet_flag = mmgsiege_can_stockpile_$RESOURCE$
+		}
+	}
+}
+
+mmgsiege_set_stockpile_budget_percent = {
+	set_variable = {
+		which = mmgsiege_$RESOURCE$_stockpile_budget_percent
+		value = $PERCENT$
+	}
+	mmgsiege_set_stockpile_budget_from_percent = { RESOURCE = $RESOURCE$ }
+}
+
+mmgsiege_remove_siege_modifier = {
+	remove_planet_flag = mmgsiege_under_siege
+	remove_modifier = mmgsiege_under_siege
+}
+
+mmgsiege_update_planet_status = {
+	mmgsiege_fix_invalid_shortage_levels = yes
+	if = {
+		limit = { mmgsiege_is_under_siege = yes }
+		set_planet_flag = mmgsiege_under_siege
+		# add temporary economy intel report, for intel_economy_colonies_high
+		# this will temporarily survey all colonies so besieger can see modifiers, etc
+		# using set_surveyed only works for day, then is automatically updated because of intel
+		solar_system.starbase.controller = {
+			if = {
+				limit = { NOT = { is_same_value = prev.owner } }
+				add_intel_report = {
+					category = economy
+					level = 3
+					days = 31
+					who = prev.owner
+				}
+			}
+		}
+		# prevent revolts
+		if = {
+			# prevent non-slave revolts
+			limit = { has_planet_flag = unrest_timer }
+			remove_planet_flag = unrest_timer
+		}
+		if = {
+			# prevent slave revolts from progressing
+			limit = {
+				is_variable_set = unrest_50
+				check_variable = {
+					which = unrest_50
+					value >= 1
+				}
+			}
+			subtract_variable = {
+				which = unrest_50
+				value = 1
+			}
+		}
+		# set under_siege modifier
+		if = {
+			limit = { NOT = { has_modifier = mmgsiege_under_siege } }
+			add_modifier = { modifier = mmgsiege_under_siege }
+		}
+		# # make armies under supplied
+		# if = {
+		# 	limit = {
+		# 		is_occupied_flag = no
+		# 		has_ground_combat = no
+		# 		count_planet_army = { count >= 1 }
+		# 	}
+		# 	set_variable = {
+		# 		which = mmgsiege_army_shortage
+		# 		value = value:mmgsiege_planet_average_army_supply_shortage
+		# 	}
+		# }
+		# # add under supplied trait to general / create temporary general
+		# if = {
+		# 	limit = { mmgsiege_planet_has_army_supply_shortage = yes }
+		# 	if = {
+		# 		limit = { NOT = { exists = army_leader } }
+		# 		mmgsiege_assign_temporary_general = yes
+		# 		# on_leader_assigned will add the trait
+		# 	} else = {
+		# 		limit = { exists = army_leader }
+		# 		army_leader = {
+		# 			mmgsiege_add_under_supplied_general_trait = yes
+		# 		}
+		# 	}
+		# }
+	}
+	else_if = {
+		limit = {
+			NOR = {
+				mmgsiege_has_resource_shortage = { RESOURCE = energy }
+				mmgsiege_has_resource_shortage = { RESOURCE = minerals }
+				mmgsiege_has_resource_shortage = { RESOURCE = food }
+				mmgsiege_has_resource_shortage = { RESOURCE = consumer_goods }
+			}
+		}
+		mmgsiege_remove_siege_modifier = yes
+	}
+}
+
+mmgsiege_create_or_remove_shortage_modifiers = {
+	if = {
+		limit = {
+			exists = owner
+			OR = {
+				has_planet_flag = mmgsiege_energy_shortage
+				has_planet_flag = mmgsiege_minerals_shortage
+				has_planet_flag = mmgsiege_food_shortage
+				has_planet_flag = mmgsiege_consumer_goods_shortage
+			}
+		}
+		if = {
+			limit = { NOT = { has_modifier = mmgsiege_under_siege } }
+			add_modifier = { modifier = mmgsiege_under_siege }
+		}
+		if = {
+			limit = { NOT = { has_deposit = mmgsiege_shortage_feature } }
+			add_deposit = mmgsiege_shortage_feature
+		}
+	}
+	else = {
+		if = {
+			limit = {
+				has_modifier = mmgsiege_under_siege
+				mmgsiege_is_under_siege = no
+			}
+			mmgsiege_remove_siege_modifier = yes
+		}
+		if = {
+			limit = { has_deposit = mmgsiege_shortage_feature }
+			remove_deposit = mmgsiege_shortage_feature
+		}
+	}
+}
+
+mmgsiege_fix_invalid_resource_shortage_level = {
+	if = {
+		limit = {
+			is_variable_set = mmgsiege_$RESOURCE$_shortage_level
+			check_variable = {
+				which = mmgsiege_$RESOURCE$_shortage_level
+				value > 4
+			}
+		}
+		set_variable = {
+			which = mmgsiege_$RESOURCE$_shortage_level
+			value = 4
+		}
+	}
+}
+
+mmgsiege_fix_invalid_shortage_levels = {
+	mmgsiege_fix_invalid_resource_shortage_level = { RESOURCE = energy }
+	mmgsiege_fix_invalid_resource_shortage_level = { RESOURCE = minerals }
+	mmgsiege_fix_invalid_resource_shortage_level = { RESOURCE = food }
+	mmgsiege_fix_invalid_resource_shortage_level = { RESOURCE = consumer_goods }
+}

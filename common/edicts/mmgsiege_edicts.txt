@@ -1,0 +1,90 @@
+mmgsiege_stockpile_automation = {
+	icon = "GFX_edict_type_time"
+	length = -1
+	resources = {
+		category = mmgsiege_stockpile_budget
+		upkeep = {
+			energy = 1
+			multiplier = mmgsiege_energy_stockpile_budget
+		}
+		upkeep = {
+			minerals = 1
+			multiplier = mmgsiege_minerals_stockpile_budget
+		}
+		upkeep = {
+			food = 1
+			multiplier = mmgsiege_food_stockpile_budget
+		}
+		upkeep = {
+			consumer_goods = 1
+			multiplier = mmgsiege_consumer_goods_stockpile_budget
+		}
+	}
+	potential = {
+		NOT = { has_country_flag = mmgsiege_stockpile_automation_alt }
+	}
+	allow = {
+		NOT = { has_country_flag = mmgsiege_stockpile_automation_open }
+	}
+	ai_weight = {
+		weight = 0
+	}
+}
+
+mmgsiege_stockpile_automation_alt = {
+	icon = "GFX_edict_type_time"
+	length = -1
+	resources = {
+		category = mmgsiege_stockpile_budget
+		upkeep = {
+			energy = 1
+			multiplier = mmgsiege_energy_stockpile_budget
+		}
+		upkeep = {
+			minerals = 1
+			multiplier = mmgsiege_minerals_stockpile_budget
+		}
+		upkeep = {
+			food = 1
+			multiplier = mmgsiege_food_stockpile_budget
+		}
+		upkeep = {
+			consumer_goods = 1
+			multiplier = mmgsiege_consumer_goods_stockpile_budget
+		}
+	}
+	potential = {
+		has_country_flag = mmgsiege_stockpile_automation_alt
+	}
+	allow = {
+		NOT = { has_country_flag = mmgsiege_stockpile_automation_open }
+	}
+	ai_weight = {
+		weight = 0
+	}
+}
+
+mmgsiege_manage_stockpile_automation = {
+	icon = "GFX_edict_type_policy"
+	length = 1
+	potential = {
+		always = yes
+	}
+	allow = {
+		NOR = {
+			has_edict = mmgsiege_stockpile_automation
+			has_edict = mmgsiege_stockpile_automation_alt
+			has_country_flag = mmgsiege_stockpile_automation_open
+		}
+	}
+	effect = {
+		hidden_effect = {
+			country_event = {
+				id = mmgsiege_stockpile_automation.102
+			}
+		}
+	}
+	ai_weight = {
+		weight = 0
+	}
+}

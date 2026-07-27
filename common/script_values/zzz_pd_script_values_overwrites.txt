@@ -1,0 +1,47 @@
+# zero jobs/housing from dome stations when system is under siege
+
+num_pd_moon_jobs = {
+	base = 1
+	modifier = {
+		add = 2
+		planet = { has_upgraded_capital = yes }
+	}
+	modifier = {
+		add = 3
+		planet = { has_major_upgraded_capital = yes }
+	}
+	modifier = {
+		add = 6
+		planet = { has_fully_upgraded_capital = yes }
+	}
+	floor = yes
+	# OVERWRITE
+	modifier = {
+		multiply = 0
+		planet = { mmgsiege_is_under_siege = yes }
+	}
+}
+
+num_pd_jobs_from_hubs = {
+	base = 1
+	modifier = {
+		add = 2
+		planet = { has_upgraded_capital = yes }
+	}
+	modifier = {
+		add = 3
+		planet = { has_major_upgraded_capital = yes }
+	}
+	modifier = {
+		add = 6
+		planet = { has_fully_upgraded_capital = yes }
+	}
+	divide = solar_system.value:num_pd_solar_system_total_hubs
+	floor = yes
+	min = 1
+	# OVERWRITE
+	modifier = {
+		multiply = 0
+		planet = { mmgsiege_is_under_siege = yes }
+	}
+}

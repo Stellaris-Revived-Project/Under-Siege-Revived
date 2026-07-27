@@ -1,0 +1,13 @@
+# DEPRECATED
+# keeping around for save game compat
+mmgsiege_stockpile_budget_feature = {
+	icon = d_bunker_door
+	is_for_colonizable = yes
+	category = mmgsiege_deposit_cat
+	potential = {
+		always = no
+	}
+	drop_weight = {
+		weight = 0
+	}
+}

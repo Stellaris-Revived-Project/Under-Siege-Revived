@@ -1,0 +1,18 @@
+# AVB
+building_avb_resource_silo_2 = { potential = { always = no } allow = { always = no } }
+building_avb_resource_silo_3 = { potential = { always = no } allow = { always = no } }
+
+# Evolved
+building_tec_resource_silo_2 = { potential = { always = no } allow = { always = no } }
+building_tec_resource_silo_3 = { potential = { always = no } allow = { always = no } }
+building_tec_biohive_resource_silo_1 = { potential = { always = no } allow = { always = no } }
+building_tec_biohive_resource_silo_2 = { potential = { always = no } allow = { always = no } }
+building_tec_biohive_resource_silo_3 = { potential = { always = no } allow = { always = no } }
+building_tec_vault_of_plenty = { potential = { always = no } allow = { always = no } }
+building_tec_vault_of_acquisition = { potential = { always = no } allow = { always = no } }
+building_tec_vault_of_unity = { potential = { always = no } allow = { always = no } }
+building_tec_vault_of_wealth = { potential = { always = no } allow = { always = no } }
+
+# ZOFE
+building_fallen_silo_1 = { potential = { always = no } allow = { always = no } }
+building_fallen_silo_2 = { potential = { always = no } allow = { always = no } }
