@@ -13,8 +13,7 @@ mmgsiege_can_stockpile = {
 	solar_system = {
 		exists = starbase
 		starbase = {
-			exists = controller
-			controller = {
+			controller? = {
 				is_same_value = prevprevprev.owner
 			}
 		}
@@ -29,8 +28,7 @@ mmgsiege_is_under_siege = {
 			exists = solar_system
 			exists = solar_system.starbase
 			exists = solar_system.starbase.controller
-			exists = controller
-			controller = {
+			controller? = {
 				NOT = {
 					is_same_value = prev.solar_system.starbase.controller
 				}
@@ -113,8 +111,7 @@ mmgsiege_has_recovering_resource_shortage = {
 mmgsiege_is_biological_army = {
 	OR = {
 		AND = {
-			exists = species
-			species = { is_archetype = BIOLOGICAL }
+			species? = { is_archetype = BIOLOGICAL }
 		}
 		army_type = xenomorph_army
 		army_type = mutant_army
@@ -128,8 +125,7 @@ mmgsiege_is_biological_army = {
 				army_type = new_world_order_defensive_army
 				army_type = new_world_order_offensive_army
 			}
-			exists = owner_main_species
-			owner_main_species = { is_archetype = BIOLOGICAL }
+			owner_main_species? = { is_archetype = BIOLOGICAL }
 		}
 	}
 }
@@ -137,8 +133,7 @@ mmgsiege_is_biological_army = {
 mmgsiege_is_lithoid_army = {
 	OR = {
 		AND = {
-			exists = species
-			species = { is_archetype = LITHOID }
+			species? = { is_archetype = LITHOID }
 		}
 		army_type = crystal_kraken_army
 		AND = {
