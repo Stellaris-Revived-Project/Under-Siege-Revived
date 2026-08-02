@@ -44,11 +44,11 @@ mmgsiege_has_resource_shortage = {
 	AND = {
 		has_planet_flag = mmgsiege_$RESOURCE$_shortage
 		[[LEVEL]
-		is_variable_set = mmgsiege_$RESOURCE$_shortage_level
-		check_variable = {
-			which = mmgsiege_$RESOURCE$_shortage_level
-			value = $LEVEL$
-		}
+			is_variable_set = mmgsiege_$RESOURCE$_shortage_level
+			check_variable = {
+				which = mmgsiege_$RESOURCE$_shortage_level
+				value = $LEVEL$
+			}
 		]
 	}
 }
