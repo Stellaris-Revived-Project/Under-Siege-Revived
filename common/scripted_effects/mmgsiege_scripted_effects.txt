@@ -227,7 +227,7 @@ mmgsiege_check_for_and_update_resource_shortage_no_siege = {
 mmgsiege_increase_resource_shortage = {
 	if = {
 		limit = { NOT = { mmgsiege_has_resource_shortage = { RESOURCE = $RESOURCE$ } } }
-		set_planet_flag = mmgsiege_$RESOURCE$_shortage
+		set_carrier_flag = mmgsiege_$RESOURCE$_shortage
 		set_variable = {
 			which = mmgsiege_$RESOURCE$_shortage_level
 			value = 0
@@ -277,9 +277,9 @@ mmgsiege_decrease_resource_shortage = {
 	if = {
 		limit = {
 			NOT = { is_variable_set = mmgsiege_$RESOURCE$_shortage_level }
-			has_planet_flag = mmgsiege_$RESOURCE$_shortage
+			has_carrier_flag = mmgsiege_$RESOURCE$_shortage
 		}
-		remove_planet_flag = mmgsiege_$RESOURCE$_shortage
+		remove_carrier_flag = mmgsiege_$RESOURCE$_shortage
 	}
 }
 
@@ -775,7 +775,7 @@ mmgsiege_allocate_stockpile_budget = {
 				limit = {
 					mmgsiege_can_stockpile = yes
 				}
-				set_planet_flag = mmgsiege_can_stockpile_$RESOURCE$
+				set_carrier_flag = mmgsiege_can_stockpile_$RESOURCE$
 			}
 		}
 
@@ -787,12 +787,12 @@ mmgsiege_allocate_stockpile_budget = {
 					value > 0
 				}
 				any_owned_planet = {
-					has_planet_flag = mmgsiege_can_stockpile_$RESOURCE$
+					has_carrier_flag = mmgsiege_can_stockpile_$RESOURCE$
 				}
 			}
 			ordered_owned_planet = {
 				limit = {
-					has_planet_flag = mmgsiege_can_stockpile_$RESOURCE$
+					has_carrier_flag = mmgsiege_can_stockpile_$RESOURCE$
 				}
 				order_by = mmgsiege_$RESOURCE$_stockpile_priority
 				position = 0
@@ -839,7 +839,7 @@ mmgsiege_allocate_stockpile_budget = {
 						value = mmgsiege_$RESOURCE$_stockpile
 					}
 					# remove mmgsiege_can_stockpile_$RESOURCE$ flag, since it will now be full
-					remove_planet_flag = mmgsiege_can_stockpile_$RESOURCE$
+					remove_carrier_flag = mmgsiege_can_stockpile_$RESOURCE$
 				}
 				# update stockpile, update unallocated, flag planet
 				change_variable = {
@@ -903,9 +903,9 @@ mmgsiege_allocate_stockpile_budget = {
 		clear_variable = mmgsiege_$RESOURCE$_stockpile_budget_unallocated
 		every_owned_planet = {
 			limit = {
-				has_planet_flag = mmgsiege_can_stockpile_$RESOURCE$
+				has_carrier_flag = mmgsiege_can_stockpile_$RESOURCE$
 			}
-			remove_planet_flag = mmgsiege_can_stockpile_$RESOURCE$
+			remove_carrier_flag = mmgsiege_can_stockpile_$RESOURCE$
 		}
 	}
 }
@@ -919,7 +919,7 @@ mmgsiege_set_stockpile_budget_percent = {
 }
 
 mmgsiege_remove_siege_modifier = {
-	remove_planet_flag = mmgsiege_under_siege
+	remove_carrier_flag = mmgsiege_under_siege
 	remove_modifier = mmgsiege_under_siege
 }
 
@@ -927,7 +927,7 @@ mmgsiege_update_planet_status = {
 	mmgsiege_fix_invalid_shortage_levels = yes
 	if = {
 		limit = { mmgsiege_is_under_siege = yes }
-		set_planet_flag = mmgsiege_under_siege
+		set_carrier_flag = mmgsiege_under_siege
 		# add temporary economy intel report, for intel_economy_colonies_high
 		# this will temporarily survey all colonies so besieger can see modifiers, etc
 		# using set_surveyed only works for day, then is automatically updated because of intel
@@ -945,8 +945,8 @@ mmgsiege_update_planet_status = {
 		# prevent revolts
 		if = {
 			# prevent non-slave revolts
-			limit = { has_planet_flag = unrest_timer }
-			remove_planet_flag = unrest_timer
+			limit = { has_carrier_flag = unrest_timer }
+			remove_carrier_flag = unrest_timer
 		}
 		if = {
 			# prevent slave revolts from progressing
@@ -1012,10 +1012,10 @@ mmgsiege_create_or_remove_shortage_modifiers = {
 		limit = {
 			exists = owner
 			OR = {
-				has_planet_flag = mmgsiege_energy_shortage
-				has_planet_flag = mmgsiege_minerals_shortage
-				has_planet_flag = mmgsiege_food_shortage
-				has_planet_flag = mmgsiege_consumer_goods_shortage
+				has_carrier_flag = mmgsiege_energy_shortage
+				has_carrier_flag = mmgsiege_minerals_shortage
+				has_carrier_flag = mmgsiege_food_shortage
+				has_carrier_flag = mmgsiege_consumer_goods_shortage
 			}
 		}
 		if = {

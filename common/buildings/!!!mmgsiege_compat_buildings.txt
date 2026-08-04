@@ -1,3 +1,4 @@
+#noinspection ALL
 # AVB
 building_avb_resource_silo_2 = { potential = { always = no } allow = { always = no } }
 building_avb_resource_silo_3 = { potential = { always = no } allow = { always = no } }

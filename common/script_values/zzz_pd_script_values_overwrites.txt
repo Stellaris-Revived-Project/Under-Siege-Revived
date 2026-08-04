@@ -1,3 +1,4 @@
+#noinspection ALL
 # zero jobs/housing from dome stations when system is under siege
 
 num_pd_moon_jobs = {

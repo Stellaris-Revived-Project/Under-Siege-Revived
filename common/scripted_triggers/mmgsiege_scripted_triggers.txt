@@ -28,7 +28,7 @@ mmgsiege_is_under_siege = {
 			exists = solar_system
 			exists = solar_system.starbase
 			exists = solar_system.starbase.controller
-			controller? = {
+			owner? = {
 				NOT = {
 					is_same_value = prev.solar_system.starbase.controller
 				}

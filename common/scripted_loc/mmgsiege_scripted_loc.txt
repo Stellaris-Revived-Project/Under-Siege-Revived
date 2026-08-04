@@ -290,12 +290,14 @@ defined_text = {
 	default = "mmgsiege_shortage_substatus_progress_consumer_goods"
 }
 
+# TODO Right status is never applied, mmgsiege_status_under_siege always fails to apply
+# is_occupied_flag = yes is never considered true for some reason
 defined_text = {
 	name = MmgsiegeStatus
 	text = {
 		localization_key = "mmgsiege_status_under_siege"
 		trigger = {
-			is_occupied_flag = no
+			NOT = { is_occupied_flag = yes }
 			mmgsiege_is_under_siege = yes
 		}
 	}

@@ -7,7 +7,7 @@ country_event = {
 	is_triggered_only = yes
 	immediate = {
 		# check resource shortages on besieged planets
-		every_owned_planet = {
+		every_owned_colony = {
 			limit = {
 				mmgsiege_is_under_siege = yes
 				is_occupied_flag = no
@@ -21,14 +21,14 @@ country_event = {
 		}
 
 		# recover resource shortages on planets not under siege
-		every_owned_planet = {
+		every_owned_colony = {
 			limit = {
 				OR = {
-					has_planet_flag = mmgsiege_food_shortage
-					has_planet_flag = mmgsiege_minerals_shortage
-					has_planet_flag = mmgsiege_energy_shortage
-					has_planet_flag = mmgsiege_consumer_goods_shortage
-					has_planet_flag = mmgsiege_under_siege
+					has_carrier_flag = mmgsiege_food_shortage
+					has_carrier_flag = mmgsiege_minerals_shortage
+					has_carrier_flag = mmgsiege_energy_shortage
+					has_carrier_flag = mmgsiege_consumer_goods_shortage
+					has_carrier_flag = mmgsiege_under_siege
 				}
 				mmgsiege_is_under_siege = no
 			}
@@ -41,13 +41,13 @@ country_event = {
 		}
 
 		# clear resource shortages on occupied planets
-		every_owned_planet = {
+		every_owned_colony = {
 			limit = {
 				OR = {
-					has_planet_flag = mmgsiege_food_shortage
-					has_planet_flag = mmgsiege_minerals_shortage
-					has_planet_flag = mmgsiege_energy_shortage
-					has_planet_flag = mmgsiege_consumer_goods_shortage
+					has_carrier_flag = mmgsiege_food_shortage
+					has_carrier_flag = mmgsiege_minerals_shortage
+					has_carrier_flag = mmgsiege_energy_shortage
+					has_carrier_flag = mmgsiege_consumer_goods_shortage
 				}
 				is_occupied_flag = yes
 			}
@@ -65,7 +65,7 @@ country_event = {
 
 # stockpile events
 # calc stockpile max
-planet_event = {
+colony_event = {
 	id = mmgsiege.11
 	is_triggered_only = yes
 	hide_window = yes
@@ -75,7 +75,7 @@ planet_event = {
 }
 
 # init stockpile vars
-planet_event = {
+colony_event = {
 	id = mmgsiege.12
 	hide_window = yes
 	is_triggered_only = yes
@@ -117,9 +117,9 @@ event = {
 	is_triggered_only = yes
 	immediate = {
 		every_country = {
-			every_owned_planet = {
-				planet_event = { id = mmgsiege.11 } # init stockpile maximum
-				planet_event = { id = mmgsiege.12 } # init stockpile resources
+			every_owned_colony = {
+				colony_event = { id = mmgsiege.11 } # init stockpile maximum
+				colony_event = { id = mmgsiege.12 } # init stockpile resources
 			}
 		}
 	}
@@ -133,7 +133,7 @@ country_event = {
 		last_increased_tech = tech_construction_templates
 	}
 	immediate = {
-		every_owned_planet = {
+		every_owned_colony = {
 			mmgsiege_calculate_stockpile_maximum = yes
 		}
 	}
@@ -145,7 +145,7 @@ system_event = {
 	hide_window = yes
 	is_triggered_only = yes
 	immediate = {
-		every_system_planet = {
+		every_system_planet_colony = {
 			limit = { is_colony = yes }
 			mmgsiege_update_planet_status = yes
 		}
@@ -153,7 +153,7 @@ system_event = {
 }
 
 # update planet status on_planet_transfer on_planet_occupied
-planet_event = {
+colony_event = {
 	id = mmgsiege.32
 	hide_window = yes
 	is_triggered_only = yes
@@ -161,10 +161,10 @@ planet_event = {
 		if = {
 			limit = {
 				OR = {
-					has_planet_flag = mmgsiege_food_shortage
-					has_planet_flag = mmgsiege_minerals_shortage
-					has_planet_flag = mmgsiege_energy_shortage
-					has_planet_flag = mmgsiege_consumer_goods_shortage
+					has_carrier_flag = mmgsiege_food_shortage
+					has_carrier_flag = mmgsiege_minerals_shortage
+					has_carrier_flag = mmgsiege_energy_shortage
+					has_carrier_flag = mmgsiege_consumer_goods_shortage
 				}
 				is_occupied_flag = yes
 			}
@@ -218,7 +218,7 @@ country_event = {
 	immediate = {
 		every_galaxy_planet = {
 			limit = {
-				has_planet_flag = mmgsiege_under_siege
+				has_carrier_flag = mmgsiege_under_siege
 				NOT = { exists = owner }
 			}
 			mmgsiege_update_planet_status = yes
