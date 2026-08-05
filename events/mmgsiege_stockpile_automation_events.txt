@@ -115,7 +115,7 @@ event = {
 	}
 }
 
-# cache planet stockpile resource balance/upkeep for calcuating priorities, run every six months
+# cache planet stockpile resource balance/upkeep for calculating priorities, run every six months
 country_event = {
 	id = mmgsiege_stockpile_automation.202
 	is_triggered_only = yes
