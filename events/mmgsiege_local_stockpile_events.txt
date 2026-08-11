@@ -20,7 +20,7 @@ country_event = {
 }
 
 # wrapper to set up scopes
-colony_event = {
+planet_event = {
 	id = mmgsiege_local_stockpile.102
 	is_triggered_only = yes
 	hide_window = yes

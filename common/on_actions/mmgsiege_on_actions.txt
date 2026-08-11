@@ -83,7 +83,7 @@ on_planet_ownerless = {
 
 on_planet_occupied = {
 	events = {
-		mmgsiege.32 # update planet siege status
+		mmgsiege.42 # update planet siege status
 	}
 }
 

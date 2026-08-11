@@ -153,7 +153,7 @@ system_event = {
 }
 
 # update planet status on_planet_transfer on_planet_occupied
-planet_event = {
+colony_event = {
 	id = mmgsiege.32
 	hide_window = yes
 	is_triggered_only = yes
@@ -165,6 +165,34 @@ planet_event = {
 					has_carrier_flag = mmgsiege_minerals_shortage
 					has_carrier_flag = mmgsiege_energy_shortage
 					has_carrier_flag = mmgsiege_consumer_goods_shortage
+				}
+				is_occupied_flag = yes
+			}
+			while = {
+				count = 4
+				mmgsiege_decrease_resource_shortage = { RESOURCE = energy }
+				mmgsiege_decrease_resource_shortage = { RESOURCE = minerals }
+				mmgsiege_decrease_resource_shortage = { RESOURCE = food }
+				mmgsiege_decrease_resource_shortage = { RESOURCE = consumer_goods }
+			}
+		}
+		mmgsiege_update_planet_status = yes
+	}
+}
+
+# update planet status on_planet_transfer on_planet_occupied
+planet_event = {
+	id = mmgsiege.42
+	hide_window = yes
+	is_triggered_only = yes
+	immediate = {
+		if = {
+			limit = {
+				OR = {
+					has_planet_flag = mmgsiege_food_shortage
+					has_planet_flag = mmgsiege_minerals_shortage
+					has_planet_flag = mmgsiege_energy_shortage
+					has_planet_flag = mmgsiege_consumer_goods_shortage
 				}
 				is_occupied_flag = yes
 			}
