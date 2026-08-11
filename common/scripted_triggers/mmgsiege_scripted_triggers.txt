@@ -38,6 +38,34 @@ mmgsiege_is_under_siege = {
 	}
 }
 
+mmgsiege_is_under_siege_only = {
+	custom_tooltip = {
+		fail_text = "mmgsiege_is_not_under_siege_success"
+		success_text = "mmgsiege_is_not_under_siege_fail"
+		AND = {
+			mmgsiege_is_under_siege = yes
+			NOT = { mmgsiege_is_planet_occupied = yes }
+		}
+	}
+}
+
+mmgsiege_is_planet_occupied = {
+	custom_tooltip = {
+		fail_text = "mmgsiege_planet_not_occupied_fail"
+		success_text = "mmgsiege_planet_not_occupied_fail"
+		AND = {
+			exists = owner
+			exists = controller
+			owner = {
+				NOT = {
+					is_same_value = prev.controller
+				}
+				is_hostile = prev.controller
+			}
+		}
+	}
+}
+
 mmgsiege_has_resource_shortage = {
 	AND = {
 		has_planet_flag = mmgsiege_$RESOURCE$_shortage

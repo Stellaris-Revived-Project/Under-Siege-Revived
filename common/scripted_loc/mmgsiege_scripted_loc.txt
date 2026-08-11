@@ -295,17 +295,15 @@ defined_text = {
 defined_text = {
 	name = MmgsiegeStatus
 	text = {
-		localization_key = "mmgsiege_status_under_siege"
+		localization_key = "mmgsiege_status_under_siege_occupied"
 		trigger = {
-			NOT = { is_occupied_flag = yes }
-			mmgsiege_is_under_siege = yes
+			mmgsiege_is_planet_occupied = yes
 		}
 	}
 	text = {
-		localization_key = "mmgsiege_status_under_siege_occupied"
+		localization_key = "mmgsiege_status_under_siege"
 		trigger = {
-			is_occupied_flag = yes
-			mmgsiege_is_under_siege = yes
+			mmgsiege_is_under_siege_only = yes
 		}
 	}
 	default = "mmgsiege_status_not_under_siege"

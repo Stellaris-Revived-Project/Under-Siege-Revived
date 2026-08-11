@@ -153,7 +153,7 @@ system_event = {
 }
 
 # update planet status on_planet_transfer on_planet_occupied
-colony_event = {
+planet_event = {
 	id = mmgsiege.32
 	hide_window = yes
 	is_triggered_only = yes

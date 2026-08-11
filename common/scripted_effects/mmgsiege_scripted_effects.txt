@@ -927,7 +927,7 @@ mmgsiege_update_planet_status = {
 	mmgsiege_fix_invalid_shortage_levels = yes
 	if = {
 		limit = { mmgsiege_is_under_siege = yes }
-		set_carrier_flag = mmgsiege_under_siege
+		set_planet_flag = mmgsiege_under_siege
 		# add temporary economy intel report, for intel_economy_colonies_high
 		# this will temporarily survey all colonies so besieger can see modifiers, etc
 		# using set_surveyed only works for day, then is automatically updated because of intel
@@ -946,7 +946,7 @@ mmgsiege_update_planet_status = {
 		if = {
 			# prevent non-slave revolts
 			limit = { has_carrier_flag = unrest_timer }
-			remove_carrier_flag = unrest_timer
+			remove_planet_flag = unrest_timer
 		}
 		if = {
 			# prevent slave revolts from progressing
@@ -1064,3 +1064,4 @@ mmgsiege_fix_invalid_shortage_levels = {
 	mmgsiege_fix_invalid_resource_shortage_level = { RESOURCE = food }
 	mmgsiege_fix_invalid_resource_shortage_level = { RESOURCE = consumer_goods }
 }
+

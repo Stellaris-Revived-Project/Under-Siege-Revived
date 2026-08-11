@@ -99,6 +99,9 @@
  mmgsiege_is_not_under_siege_fail: "£trigger_no£ Planet is Under Siege"
  mmgsiege_is_not_under_siege_success: "£trigger_yes£ Planet is NOT Under Siege"
 
+ mmgsiege_planet_not_occupied_fail: "£trigger_no£ Planet is under occupation"
+ mmgsiege_planet_not_occupied_success: "£trigger_yes£ Planet is NOT under occupied"
+
  edict_mmgsiege_stockpile_automation: "Siege Stockpile Automation"
  edict_mmgsiege_stockpile_automation_desc: "Transfer some of your monthly income to planetary stockpiles, so planets are prepared for sieges.\n\n§YSiege Stockpile Budget§! §Rmust be closed in order to turn this on.§!"
  edict_mmgsiege_stockpile_automation_alt: "$edict_mmgsiege_stockpile_automation$" # DO NOT TRANSLATE
