@@ -83,7 +83,7 @@ mmgsiege_check_for_and_update_resource_shortage = {
 		}
 	}
 
-	# check is balance is negative
+	# check if balance is negative
 	if = {
 		limit = {
 			check_variable = {
