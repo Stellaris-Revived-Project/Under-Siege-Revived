@@ -40,6 +40,7 @@ If you encounter a bug or have a suggestion, please open a GitHub Issue or repor
 
 **Maintained by Gregor Samsa**
 - GitHub: https://github.com/Greg-rSamsa
+- Revival Project GitHub: https://github.com/Stellaris-Revived-Project
 - Discord: https://discord.gg/wY2EKWThSZ
 - Steam: https://steamcommunity.com/id/gregor_samsa_II/
 - Email: [maintainer@gregorsamsa.cc](mailto:maintainer@gregorsamsa.cc)
