@@ -7,20 +7,15 @@ Unless otherwise stated, I do **not** claim ownership of the original work. Full
 
 ---
 
-## License
-
-This mod is provided under a **non-commercial permission license**. You are free to use, modify, copy, and redistribute this mod, including publishing modified or derivative versions, provided that no monetary gain is made from the mod or its derivatives.
-
-Please retain credit to the original creator and, where applicable, the current maintainer. This permission does not grant any rights to Stellaris, Paradox Interactive's assets, or other third-party content.
-
----
-
 ## Credits
 **Original Author:** [Oatmeal Problem](https://steamcommunity.com/id/OatmealProblem)
 
 **Original Mod Page:** [Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=2786268200)
 
 *Revived Mod Page:** [Steam Workshop]()
+
+You are free to use, modify, copy, and redistribute this mod, including publishing modified or derivative versions, provided that the mod or its derivatives upholds the Paradox Interactive End-User License Agreement. 
+Please retain credit to the original creator and, where applicable, the current maintainer. This permission does not grant any rights to Stellaris, Paradox Interactive's assets, or other third-party content.
 
 ---
 
