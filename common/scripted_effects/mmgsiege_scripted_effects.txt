@@ -767,7 +767,7 @@ mmgsiege_allocate_stockpile_budget = {
 		ceiling_variable = mmgsiege_$RESOURCE$_stockpile_granularity
 
 		# init can_stockpile flag and priority var
-		every_owned_planet = {
+		every_owned_colony = {
 			mmgsiege_calculate_stockpile_priority = {
 				RESOURCE = $RESOURCE$
 			}
@@ -786,11 +786,11 @@ mmgsiege_allocate_stockpile_budget = {
 					which = mmgsiege_$RESOURCE$_stockpile_budget_unallocated
 					value > 0
 				}
-				any_owned_planet = {
+				any_owned_colony = {
 					has_carrier_flag = mmgsiege_can_stockpile_$RESOURCE$
 				}
 			}
-			ordered_owned_planet = {
+			ordered_owned_colony = {
 				limit = {
 					has_carrier_flag = mmgsiege_can_stockpile_$RESOURCE$
 				}
@@ -901,7 +901,7 @@ mmgsiege_allocate_stockpile_budget = {
 		# clean up
 		clear_variable = mmgsiege_$RESOURCE$_stockpile_granularity
 		clear_variable = mmgsiege_$RESOURCE$_stockpile_budget_unallocated
-		every_owned_planet = {
+		every_owned_colony = {
 			limit = {
 				has_carrier_flag = mmgsiege_can_stockpile_$RESOURCE$
 			}

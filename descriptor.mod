@@ -5,5 +5,5 @@ tags={
 }
 name="Under Siege Revived"
 picture="thumbnail.png"
-supported_version="v4.5.*"
+supported_version="v4.6.*"
 remote_file_id="3771629021"
