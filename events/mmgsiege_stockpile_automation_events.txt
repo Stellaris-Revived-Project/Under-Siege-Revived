@@ -121,7 +121,7 @@ country_event = {
 	is_triggered_only = yes
 	hide_window = yes
 	immediate = {
-		every_owned_planet = {
+		every_owned_colony = {
 			mmgsiege_export_planet_balance_and_upkeep = { RESOURCE = energy }
 			mmgsiege_export_planet_balance_and_upkeep = { RESOURCE = minerals }
 			mmgsiege_export_planet_balance_and_upkeep = { RESOURCE = food }
